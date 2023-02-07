@@ -14,14 +14,16 @@
  import BillsUI from "../views/BillsUI.js";
  import oneBill from "../__mocks__/oneBill";
  import router from "../app/Router.js";
+ import { fileValidation } from "../app/format.js";
 
 
 describe("When I am on NewBill Page and upload a new file", () => {
     beforeEach(() => {
-      console.log("BEfore")
+      Object.defineProperty(window, "localStorage", { value: localStorageMock } )
+      window.localStorage.setItem( "user", JSON.stringify( { type: "Employee" } ) )
       document.body.innerHTML = NewBillUI()
-    const onNavigate = (pathname) => {document.body.innerHTML = ROUTES({ pathname })}
-    const newBill = new NewBill({document, onNavigate, store: mockStore, localStorage: window.localStorage})
+      const onNavigate = (pathname) => {document.body.innerHTML = ROUTES({ pathname })}
+      const newBill = new NewBill({document, onNavigate, store: mockStore, localStorage: window.localStorage})
     })
   test("Then if the format is correct the name of the new file should display", async () => {
     const filePNG = new File(['hello'], 'hello.png', {type: 'image/png'})
@@ -29,9 +31,12 @@ describe("When I am on NewBill Page and upload a new file", () => {
     const InputFile = screen.getByTestId("file")
     userEvent.upload(InputFile, filePNG)
     expect(InputFile.files[0].name).toEqual("hello.png")
-    //expect(screen.getAllByTestId('alertFormat')).not.toBeTruthy() 
-    //console.log('name',newBill.fileName) //-->Null
-    //console.log('url',newBill.formData) //-->Null
+    //expect(screen.getAllByTestId('alertFormat')).not.toBeTruthy() //-->not found: OK!
+    //expect(screen.getByText("Uniquement les formats jpeg/jpg/png sont acceptés!")).not.toBeTruthy() //-->not found: OK!
+    const valid = fileValidation(filePNG)
+    console.log('valid?',valid)
+    expect(valid).toBeTruthy()
+    
   })
   test("Then if the format is not correct an alert message should display", async () => {
     const fileGIF = new File(['hello'], 'hello.gif', {type: 'image/gif'})
@@ -39,35 +44,12 @@ describe("When I am on NewBill Page and upload a new file", () => {
     const InputFile = screen.getByTestId("file")
     userEvent.upload(InputFile, fileGIF)
     userEvent.click(InputFile)
-    expect(screen.getAllByTestId('alertFormat')).toBeTruthy() //--->verif 'All'?*/
+    expect(screen.getByTestId('alertFormat')).toBeTruthy()
 
-
-    /***************************************
-    const handleChangeFile = jest.fn(newBill.handleChangeFile);
-
-    //const attachedFile = screen.getByTestId('file');
-    InputFile.addEventListener('change', handleChangeFile);
-    fireEvent.change(InputFile, {
-      target: {
-        files: [
-          new File(['hello'], 'hello.png', {type: 'image/png'})
-        ],
-      },
-    });
-    await new Promise(process.nextTick);
-    // expected results
-    expect(handleChangeFile).toHaveBeenCalled();
-    expect(InputFile.files[0].name).toBe('hello.png');
-    //console.log(newBill.fileName) //-->Null
-    
-    console.log('fileName: ',newBill.fileName) //-->Null
-    
-    const newBillForm = screen.getByTestId('form-new-bill')
-    expect(newBillForm).toBeTruthy()
-    //******************************************** */
-
-
-  })
+    const novalid = fileValidation(fileGIF)
+    console.log('novalid?',novalid)
+    expect(novalid).not.toBeTruthy()
+  }) 
 })
 
 describe("When I click on submit button", () => {  
@@ -79,7 +61,8 @@ describe("When I click on submit button", () => {
       document.body.innerHTML = ROUTES({ pathname });
     }
     new NewBill({document, onNavigate, store: mockStore, localStorage: window.localStorage})    
-    expect(screen.getByText("Envoyer une note de frais")).toBeTruthy()   
+    expect(screen.getByText("Envoyer une note de frais")).toBeTruthy()
+    //expect(screen.getByText("Mes notes de frais")).not.toBeTruthy() // not found -->OK!  
     const submitBtn  = screen.getByText("Envoyer")
     userEvent.click(submitBtn)
     expect(screen.getByText("Mes notes de frais")).toBeTruthy()
@@ -88,7 +71,7 @@ describe("When I click on submit button", () => {
 
 // test d'intégration POST
 describe("When I am on NewBill Page and I post a new bill", () => {
-  test("add bill to mock API POST", async () => {
+  test("Then the bill should be addad to the store", async () => {
     const post = jest.spyOn(postStore, "post")
     let billList = await postStore.get()
     expect(billList.data.length).toBe(0)
@@ -107,5 +90,6 @@ describe("When I am on NewBill Page and I post a new bill", () => {
     expect(errorMessage).toBeTruthy()
   })
 })
+
 
 

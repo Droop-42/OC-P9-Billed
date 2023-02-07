@@ -20,16 +20,17 @@ export const formatStatus = (status) => {
 }
 
 export const fileValidation = (file) => {
-  console.log("mon fichier", file.value)
+  console.log('file?', file)
   var fileInput = file
-  var filePath = fileInput.value;
+  var filePath = fileInput.name//value;
+  console.log('filepath?', filePath)
   var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
   const alertForm = document.createElement("div");
   alertForm.classList.add("alertFormat")
   alertForm.setAttribute('data-testid', 'alertFormat')
   alertForm.id = 'alertFormat'
   alertForm.innerHTML = 'Uniquement les formats jpeg/jpg/png sont acceptés!'
-  if(!allowedExtensions.exec(filePath)){
+  if(!allowedExtensions.exec(filePath) || filePath==''){
       //alert('Please upload file having extensions .jpeg/.jpg/.png only.');
       fileInput.value = '';
       document.querySelector(`input[data-testid="file"]`).after(alertForm)

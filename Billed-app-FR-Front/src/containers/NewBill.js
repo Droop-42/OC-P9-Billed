@@ -1,6 +1,6 @@
 import { ROUTES_PATH } from '../constants/routes.js'
 import Logout from "./Logout.js"
-import { fileValidation } from '../app/format.js'
+import { fileValidation } from "../app/format.js";
 
 export default class NewBill {
   constructor({ document, onNavigate, store, localStorage }) {
@@ -19,7 +19,7 @@ export default class NewBill {
 
   handleChangeFile = e => {
     e.preventDefault()
-    if (fileValidation(e.target)) {
+    if (fileValidation(e.target.files[0]) && e.target.files[0]!='') {
       const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
       const filePath = e.target.value.split(/\\/g)
       const fileName = filePath[filePath.length-1]
@@ -41,10 +41,8 @@ export default class NewBill {
           this.billId = key
           this.fileUrl = fileUrl
           this.fileName = fileName
-          //console.log(this.fileName)
         }).catch((error) => {
-          //console.error(error)
-          //console.log(this.fileName)
+          console.error(error)
       })
     }
   }

@@ -1,5 +1,4 @@
 import postStore from "./postStore";
-import ErrorPage from "../views/ErrorPage.js"
 import BillsUI from "../views/BillsUI.js";
 
 export default {
