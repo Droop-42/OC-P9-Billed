@@ -17,19 +17,19 @@
 
 
 describe("When I am on NewBill Page and upload a new file", () => {
-    document.body.innerHTML = NewBillUI()
+    beforeEach(() => {
+      console.log("BEfore")
+      document.body.innerHTML = NewBillUI()
     const onNavigate = (pathname) => {document.body.innerHTML = ROUTES({ pathname })}
     const newBill = new NewBill({document, onNavigate, store: mockStore, localStorage: window.localStorage})
-  
+    })
   test("Then if the format is correct the name of the new file should display", async () => {
-    const handleChangeFile = jest.fn(newBill.handleChangeFile) //?
     const filePNG = new File(['hello'], 'hello.png', {type: 'image/png'})
     await waitFor(() => screen.getByTestId("file"))
     const InputFile = screen.getByTestId("file")
     userEvent.upload(InputFile, filePNG)
-    await new Promise(process.nextTick)
     expect(InputFile.files[0].name).toEqual("hello.png")
-    //expect(handleChangeFile).toHaveBeenCalled() //-->0 expected:1
+    //expect(screen.getAllByTestId('alertFormat')).not.toBeTruthy() 
     //console.log('name',newBill.fileName) //-->Null
     //console.log('url',newBill.formData) //-->Null
   })
@@ -39,7 +39,9 @@ describe("When I am on NewBill Page and upload a new file", () => {
     const InputFile = screen.getByTestId("file")
     userEvent.upload(InputFile, fileGIF)
     userEvent.click(InputFile)
-    expect(screen.getAllByTestId('alertFormat')).toBeTruthy() //--->verif 'All'?
+    expect(screen.getAllByTestId('alertFormat')).toBeTruthy() //--->verif 'All'?*/
+
+
     /***************************************
     const handleChangeFile = jest.fn(newBill.handleChangeFile);
 
@@ -63,6 +65,8 @@ describe("When I am on NewBill Page and upload a new file", () => {
     const newBillForm = screen.getByTestId('form-new-bill')
     expect(newBillForm).toBeTruthy()
     //******************************************** */
+
+
   })
 })
 
@@ -83,27 +87,25 @@ describe("When I click on submit button", () => {
 })
 
 // test d'intégration POST
-
 describe("When I am on NewBill Page and I post a new bill", () => {
   test("add bill to mock API POST", async () => {
     const post = jest.spyOn(postStore, "post")
     let billList = await postStore.get()
     expect(billList.data.length).toBe(0)
-
     billList = await postStore.post(oneBill)
     expect(post).toHaveBeenCalled()
     expect(billList.data.length).toBe(1)
-  });
-  test("Then if not found a 404 error message should display", async () => {
-    document.body.innerHTML = BillsUI({ error: "Erreur 404" })
+  })
+  test("Then if not found (given void bill) a 404 error message should display", async () => {
+    await postStore.post('')
     const errorMessage = await screen.getByText(/Erreur 404/)
     expect(errorMessage).toBeTruthy();
   })
-  test("Then if a server error occur a 500 error message should display", async () => {
-    document.body.innerHTML = BillsUI({ error: "Erreur 500" })
+  test("Then if a server error occur (given null bill) a 500 error message should display", async () => {
+    await postStore.post(null)
     const errorMessage = await screen.getByText(/Erreur 500/)
     expect(errorMessage).toBeTruthy()
-  });
-});
+  })
+})
 
 

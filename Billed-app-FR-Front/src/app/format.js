@@ -20,6 +20,7 @@ export const formatStatus = (status) => {
 }
 
 export const fileValidation = (file) => {
+  console.log("mon fichier", file.value)
   var fileInput = file
   var filePath = fileInput.value;
   var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
