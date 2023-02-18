@@ -16,6 +16,7 @@
  import router from "../app/Router.js";
  import { fileValidation } from "../app/format.js";
 
+ jest.mock("../app/Store", () => mockStore);
 
 describe("When I am on NewBill Page and upload a new file", () => {
     beforeEach(() => {
@@ -34,7 +35,6 @@ describe("When I am on NewBill Page and upload a new file", () => {
     //expect(screen.getAllByTestId('alertFormat')).not.toBeTruthy() //-->not found: OK!
     //expect(screen.getByText("Uniquement les formats jpeg/jpg/png sont acceptés!")).not.toBeTruthy() //-->not found: OK!
     const valid = fileValidation(filePNG)
-    console.log('valid?',valid)
     expect(valid).toBeTruthy()
     
   })
@@ -45,9 +45,7 @@ describe("When I am on NewBill Page and upload a new file", () => {
     userEvent.upload(InputFile, fileGIF)
     userEvent.click(InputFile)
     expect(screen.getByTestId('alertFormat')).toBeTruthy()
-
     const novalid = fileValidation(fileGIF)
-    console.log('novalid?',novalid)
     expect(novalid).not.toBeTruthy()
   }) 
 })
@@ -91,5 +89,72 @@ describe("When I am on NewBill Page and I post a new bill", () => {
   })
 })
 
+
+ /* Other tests ---------
+describe("When I am on NewBill Page and upload a new file", () => {
+  test("handleChangeFile method should have been called with no error", async () => {
+    document.body.innerHTML = "";
+    Object.defineProperty(window, "localStorage", { value: localStorageMock })
+    window.localStorage.setItem( "user", JSON.stringify({ type: "Employee", email: "test@test.com" }) )
+    const root = document.createElement("div");
+    root.setAttribute("id", "root");
+    document.body.append(root);
+    router();
+    window.onNavigate(ROUTES_PATH.NewBill);
+
+    await waitFor(() => screen.getByText(/Envoyer une note de frais/));
+    const fileInput = screen.getByTestId("file");
+    expect(fileInput).toBeTruthy();
+
+    const mockFile = new File(["test.png"], "test.png", {
+        type: "image/png",
+    })
+    fireEvent.change(fileInput, { target: { files: [mockFile] } } )
+    await new Promise(process.nextTick);
+
+    const errDiv = document.querySelector('div[data-testid="alertFormat"]')
+    expect(errDiv).not.toBeTruthy()   
+  })
+//--------------
+  test("create new bill and catch a 500 error", async () => {
+      document.body.innerHTML = "";
+      Object.defineProperty(window, "localStorage", { value: localStorageMock })
+      const mockConsoleErr = jest.fn();
+      Object.defineProperty(window, "console", { value: { error: mockConsoleErr } } ) 
+      
+      jest.spyOn(mockStore, "bills")
+      const error500 = new Error('ERREUR 500')
+      mockStore.bills.mockImplementationOnce(() => {
+          return {
+              create: () => {
+                  return Promise.reject(error500)
+              }
+          }
+      })
+      window.localStorage.setItem( "user", JSON.stringify({ type: "Employee", email: "test@test.com" } ) )
+
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.append(root);
+      router();
+      window.onNavigate(ROUTES_PATH.NewBill);
+
+      await waitFor(() => screen.getByText(/Envoyer une note de frais/));
+      const fileInput = screen.getByTestId("file");
+      expect(fileInput).toBeTruthy();
+//----
+      const mockFile = new File(["test.gif"], "test.gif", {
+          type: "image/gif",
+      });
+      fireEvent.change(fileInput, { target: { files: [mockFile] } } )
+      await new Promise(process.nextTick);
+
+      expect(console.error).toHaveBeenCalledWith(error500)
+
+//----          
+  })
+
+})
+*/
 
 

@@ -20,10 +20,8 @@ export const formatStatus = (status) => {
 }
 
 export const fileValidation = (file) => {
-  console.log('file?', file)
   var fileInput = file
-  var filePath = fileInput.name//value;
-  console.log('filepath?', filePath)
+  var filePath = fileInput.name
   var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
   const alertForm = document.createElement("div");
   alertForm.classList.add("alertFormat")
